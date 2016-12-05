@@ -11,7 +11,7 @@ int main(int argc, const char *argv[])
   std::string door_id = std::string(argv[1]);
   std::string password = "";
 
-  printf("........");
+  printf("........\r");
   for (int counter = 0; password.length() < 8; counter++) {
     std::string current = door_id + std::to_string(counter);
 
@@ -26,11 +26,11 @@ int main(int argc, const char *argv[])
 
     std::string hash = std::string(out);
 
-    printf("\r%s", password.c_str());
+    printf("%c", hash[5]);
     if (hash.substr(0, 5) == "00000") {
       password += hash[5];
     } else {
-      printf("%c", hash[5]);
+      printf("%c", 0x08);
     }
   }
   printf("\n\nPassword: %s\n", password.c_str());
