@@ -2,6 +2,12 @@
 #include <openssl/md5.h>
 #include <stdlib.h>
 
+static const char alphanum[] =
+  "0123456789"
+  "abcdefghijklmnopqrstuvwxyz";
+
+int alphanumLength = sizeof(alphanum) - 1;
+
 int main(int argc, const char *argv[])
 {
   if (argc < 2) {
@@ -38,7 +44,13 @@ int main(int argc, const char *argv[])
         }
       }
     }
-    printf("\r%s", password.c_str());
+    std::string displayPass = password.c_str();
+    for (int j = 0; displayPass[j] != '\0'; j++) {
+      if (displayPass[j] == '.')
+        displayPass[j] = alphanum[rand() % alphanumLength];
+    }
+    std::replace( displayPass.begin(), displayPass.end(), '.', '%');
+    printf("\r%s", displayPass.c_str());
   }
   printf("\n\nPassword: %s\n", password.c_str());
 
