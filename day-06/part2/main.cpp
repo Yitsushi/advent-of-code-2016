@@ -32,9 +32,9 @@ char mostFrequentCharacter(const std::string str) {
   }
 
   char most_frequent = 'a';
-  int min = 99;
+  int min = 9999;
   for(int i = 0; i < 26; ++i) {
-    if (freq[i] < min) {
+    if (freq[i] < min && freq[i] > 0) {
       min = freq[i];
       most_frequent = (i + 'a');
     }
