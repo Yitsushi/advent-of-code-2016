@@ -12,7 +12,6 @@ std::vector<std::string> readfile(std::string filename)
   std::regex match_inside_brackets("\\[[^\\]]*(.)(.)\\2\\1[^\\]]*\\]");
   std::smatch match;
 
-  std::regex_iterator<std::string::iterator> r_end;
   std::fstream fin(filename, std::fstream::in);
   while (fin >> line) {
     // Skip if there is no sign of potential ABBA
