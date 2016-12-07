@@ -15,12 +15,15 @@ std::vector<std::string> readfile(std::string filename)
   std::regex_iterator<std::string::iterator> r_end;
   std::fstream fin(filename, std::fstream::in);
   while (fin >> line) {
+    // Skip if there is no sign of potential ABBA
     if (!regex_search(line, match_abba)) { continue; }
 
+    // Skip if real ABBA in brackets
     if (regex_search(line, match, match_inside_brackets)) {
       if (match[1] != match[2]) { continue; }
     }
 
+    // check real ABBA
     for(int i = 0; i < line.length() - 3; ++i) {
       if (line[i] == line[i+3] && line[i+1] == line[i+2] && line[i] != line[i+1]) {
         sequences.push_back(line);
