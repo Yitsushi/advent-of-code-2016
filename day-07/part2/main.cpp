@@ -64,7 +64,6 @@ std::vector<std::string> readfile(std::string filename)
             sequences.push_back(line);
             found = true;
             break;
-          } else {
           }
         }
         if (found) { break; }
