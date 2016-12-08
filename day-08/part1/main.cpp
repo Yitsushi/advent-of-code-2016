@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iterator>
+#include <iostream>
 
 #define ROWS 6
 #define COLUMNS 50
@@ -35,13 +37,8 @@ void rect(display_t* display, std::string arguments)
   int x, y;
   sscanf(arguments.c_str(), "%dx%d", &x, &y);
 
-  x--; y--;
-
-  printf(" rect -> %s\n", arguments.c_str());
-  for (; y >= 0; --y) {
-    for (int i = 0; i <= x; ++i) {
-      (*display)[y][i] = '#';
-    }
+  for (--y; y >= 0; --y) {
+    (*display)[y].replace((*display)[y].begin(), (*display)[y].begin()+x, x, '#');
   }
 }
 
@@ -52,7 +49,6 @@ void rotate(display_t* display, std::string arguments)
 
   sscanf(arguments.c_str(), "%*s %c=%d by %d", &direction, &coord, &value);
 
-  printf("%s[%d] -> %d\n", (direction == 'y' ? "row" : "column"), coord, value);
   if (direction == 'y') {
     std::string chop = (*display)[coord].substr(COLUMNS - value);
     (*display)[coord] = chop + (*display)[coord].substr(0, COLUMNS - value);
@@ -67,13 +63,6 @@ void rotate(display_t* display, std::string arguments)
   }
 }
 
-void display_me(display_t display)
-{
-  for (std::string s : display) {
-    printf("%s\n", s.c_str());
-  }
-}
-
 int main(int argc, const char *argv[])
 {
   if (argc < 2) {
@@ -81,19 +70,14 @@ int main(int argc, const char *argv[])
     return 1;
   }
 
+  display_t display(ROWS, std::string(COLUMNS, ' '));
+
   std::vector<Command*> commands = readfile(argv[1]);
-  display_t display;
-
-  for (int i = 0; i < ROWS; ++i) {
-    display.push_back(std::string(COLUMNS, ' '));
-  }
-
   for (Command* command : commands) {
     if (command->name == "rect") { rect(&display, command->arguments); }
     else if (command->name == "rotate") { rotate(&display, command->arguments); }
-    display_me(display);
   }
-
+  std::copy(display.begin(), display.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 
   return 0;
 }
