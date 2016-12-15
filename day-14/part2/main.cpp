@@ -1,12 +1,8 @@
 #include <string>
 #include <vector>
 #include <openssl/md5.h>
-#include <regex>
 
 #define SALT "ngcjuoqr"
-
-std::regex match_three_in_a_row("(.)\\1\\1");
-std::regex match_five_in_a_row("(.)\\1{4}");
 
 std::string md5hash(std::string current)
 {
@@ -24,14 +20,35 @@ std::string md5hash(std::string current)
   return current;
 }
 
+bool threeInRow(const std::string current, char* ch)
+{
+  for (int i = 0; i < current.length() - 2; ++i) {
+    if (current[i] == current[i+1] && current[i+1] == current[i+2]) {
+      *ch = current.c_str()[i];
+      return true;
+    }
+  }
+  return false;
+}
+
+bool fiveInRowAs(const std::string current, const char ch)
+{
+  std::string target = std::string(5, ch);
+  for (int i = 0; i < current.length() - 4; ++i) {
+    if (current.substr(i, 5) == target) {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::vector<std::string> hash_cache;
 unsigned int counter = 0;
 
 std::string nextValidKey()
 {
-  std::string valid_key;
   while(true) {
-    std::string hash = md5hash(std::string(SALT) + std::to_string(counter));
+    std::string hash;
     if (hash_cache.size() > counter) {
       hash = hash_cache.at(counter);
     } else {
@@ -39,10 +56,8 @@ std::string nextValidKey()
       hash_cache.push_back(hash);
     }
 
-    std::cmatch match;
-    if (regex_search(hash.c_str(), match, match_three_in_a_row)) {
-      char found = match[1].str().at(0);
-
+    char ch = 0x00;
+    if (threeInRow(hash, &ch)) {
       std::string subhash;
       for (int j = 1; j <= 1000; ++j) {
         if (hash_cache.size() > counter + j) {
@@ -51,11 +66,9 @@ std::string nextValidKey()
           subhash = md5hash(std::string(SALT) + std::to_string(counter + j));
           hash_cache.push_back(subhash);
         }
-        if (regex_search(subhash.c_str(), match, match_five_in_a_row)) {
-          if (match[1].str().at(0) == found) {
-            ++counter;
-            return hash;
-          }
+        if (fiveInRowAs(subhash.c_str(), ch)) {
+          ++counter;
+          return hash;
         }
       }
     }
@@ -71,7 +84,6 @@ int main()
   {
     std::string key = nextValidKey();
     valid_keys.push_back(key);
-    printf("%d -> ok\n", (int)valid_keys.size());
   }
 
   printf("Last index: %d\n", counter - 1);
