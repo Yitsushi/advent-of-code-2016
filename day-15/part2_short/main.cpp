@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <vector>
-#include <fstream>
 
 #define dzero(t, n, s, m) ((((t + n) + s) % m) == 0)
 // Disks with initial values
