@@ -9,18 +9,8 @@
 
 std::string dragon(std::string str)
 {
-  int len = str.length();
-  for (int i = 0; i < len / 2; ++i) {
-    char first = str[i];
-    char second = str[len - 1 - i];
-
-    swap10(first);
-    swap10(second);
-
-    str[i] = second;
-    str[len - 1 - i] = first;
-  }
-  if (len % 2 == 1) swap10(str[len / 2]);
+  std::reverse(str.begin(), str.end());
+  std::for_each(str.begin(), str.end(), [](char& ch) { swap10(ch); });
 
   return str;
 }
