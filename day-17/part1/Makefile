@@ -1,8 +1,8 @@
 CC= g++
 CFLAGS= -g -c -Wall -std=c++0x -stdlib=libc++
-LDFLAGS=
+LDFLAGS= -L/usr/local/opt/openssl/lib -lcrypto
 SOURCES= main.cpp
-INCLUDES= -I.
+INCLUDES= -I. -I/usr/local/opt/openssl/include
 OBJECTS= $(SOURCES:.cpp=.o)
 TARGET= solution
 
