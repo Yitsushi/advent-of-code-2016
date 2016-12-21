@@ -10,61 +10,79 @@
 struct Command
 {
   std::string arguments;
+  bool parsed;
   virtual std::string execute(std::string state) = 0;
 };
 
 struct SwapCommand : Command {
+  int x = 0, y = 0;
+  char a = 0x00, b = 0x00;
+  std::string sub;
+
   std::string execute(std::string state)
   {
-    std::string sub = arguments.substr(0, arguments.find(' '));
-    int x = 0, y = 0;
-    if (sub == "position") {
-      sscanf(arguments.c_str(), "position %d with position %d", &x, &y);
-    } else if (sub == "letter") {
-      char a = 0x00, b = 0x00;
-      sscanf(arguments.c_str(), "letter %c with letter %c", &a, &b);
+    if (!parsed) {
+      sub = arguments.substr(0, arguments.find(' '));
+      if (sub == "position") {
+        sscanf(arguments.c_str(), "position %d with position %d", &x, &y);
+      } else if (sub == "letter") {
+        sscanf(arguments.c_str(), "letter %c with letter %c", &a, &b);
+      }
+      parsed = true;
+    }
+    if (sub == "letter") {
       x = state.find(a);
       y = state.find(b);
     }
 
-    char tmp = state[x];
-    state[x] = state[y];
-    state[y] = tmp;
+    std::swap(state[x], state[y]);
     return state;
   }
 };
 
 struct RotateCommand : Command {
+  std::string direction;
+  int value = 0;
+  char c = 0x00;
+
   std::string execute(std::string state)
   {
-    std::string direction = arguments.substr(0, arguments.find(' '));
-    int value = 0;
-    if (direction == "left" || direction == "right") {
-      sscanf(arguments.c_str(), "%*s %d steps", &value);
-    } else {
-      direction = "right";
-      char c = 0x00;
-      sscanf(arguments.c_str(), "based on position of letter %c", &c);
+
+    if (!parsed) {
+      direction = arguments.substr(0, arguments.find(' '));
+      if (direction == "left" || direction == "right") {
+        sscanf(arguments.c_str(), "%*s %d steps", &value);
+      } else {
+        direction = "right";
+        sscanf(arguments.c_str(), "based on position of letter %c", &c);
+      }
+      parsed = true;
+    }
+
+    if (c != 0x00) {
       value = state.find(c);
 
       if (value >= 4) value++;
       value++;
     }
 
-    value %= state.length();
-    if (direction == "right") value = state.length() - value;
+    int steps = value % state.length();
+    if (direction == "right") steps = state.length() - steps;
 
-    state = state.substr(value) + state.substr(0, value);
+    state = state.substr(steps) + state.substr(0, steps);
 
     return state;
   }
 };
 
 struct ReverseCommand : Command {
+  int x = 0, y = 0;
   std::string execute(std::string state)
   {
-    int x = 0, y = 0;
-    sscanf(arguments.c_str(), "positions %d through %d", &x, &y);
+    if (!parsed) {
+      sscanf(arguments.c_str(), "positions %d through %d", &x, &y);
+      parsed = true;
+    }
 
     std::reverse(state.begin() + x, state.begin() + y + 1);
     return state;
@@ -72,10 +90,13 @@ struct ReverseCommand : Command {
 };
 
 struct MoveCommand : Command {
+  int from = 0, to = 0;
   std::string execute(std::string state)
   {
-    int from = 0, to = 0;
-    sscanf(arguments.c_str(), "position %d to position %d", &from, &to);
+    if (!parsed) {
+      sscanf(arguments.c_str(), "position %d to position %d", &from, &to);
+      parsed = true;
+    }
     char c = state[from];
     state.erase(state.begin() + from);
     state.insert(to, 1, c);
