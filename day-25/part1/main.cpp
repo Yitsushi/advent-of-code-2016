@@ -7,6 +7,8 @@
 #include <ctime>
 #include <list>
 
+#define SIGNAL_LENGTH 16
+
 #define int_or_addr(a)  (self->memory.hasRegister(a[0]) ? self->memory.registers[a[0]] : atoi(a.c_str()) )
 
 struct Program;
@@ -187,12 +189,20 @@ int main(int argc, const char *argv[])
 
   Program program = readfile(argv[1]);
   program.init();
-  unsigned int signal;
+
+  unsigned int signal = 0;
+  unsigned int target_signal = 0;
+
+  for (int i = 0; i < SIGNAL_LENGTH; ++i) {
+    target_signal <<= 1;
+    target_signal += i % 2;
+  }
+
   for (int a = 0; a < UINT32_MAX; ++a) {
     signal = 0;
     program.memory.init();
     program.memory.registers['a'] = a;
-    program.execute(16);
+    program.execute(SIGNAL_LENGTH);
     printf("[a=%5d] signal sent: ", a);
     for (int s : program.signal_sent) {
       signal <<= 1;
@@ -200,7 +210,7 @@ int main(int argc, const char *argv[])
       printf("%d ", s);
     }
     printf("%d\n", signal);
-    if (signal == 21845) break; // 0101010101010101 = 21845
+    if (signal == target_signal) break;
   }
   //program.dump();
 
